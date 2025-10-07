@@ -57,7 +57,7 @@
       (async () => {
         try {
           resultado.innerText = "Cargando modelo...";
-          modelo = await tf.loadLayersModel("carpetasalida/model.json");
+          modelo = await tf.loadLayersModel("model.json");
           resultado.innerText = "Modelo cargado ✅";
           mostrarCamara();
         } catch (error) {
