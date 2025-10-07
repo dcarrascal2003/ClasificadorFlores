@@ -60,7 +60,7 @@
     // ✅ Cargar modelo
     async function cargarModelo() {
       resultado.innerText = "Cargando modelo...";
-      modelo = await tf.loadLayersModel('carpeta_salida/model.json');
+      modelo = await tf.loadLayersModel("ClasificadorFlores/carpeta_salida/model.json");
       resultado.innerText = "Modelo cargado ✅";
     }
 
