@@ -1,90 +1,48 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clasificador de flores 🌸</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #f5f5f5;
-      color: #333;
-    }
-    video, canvas {
-      border-radius: 12px;
-      margin-top: 10px;
-    }
-    #resultado {
-      font-size: 1.4em;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-    button {
-      background-color: #4CAF50;
-      color: white;
-      padding: 10px 20px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-  </style>
-</head>
-<body>
-  <h1>Clasificador de Flores 🌸</h1>
-  <video id="video" width="224" height="224" autoplay playsinline></video>
-  <br>
-  <button onclick="predecir()">Predecir</button>
-  <div id="resultado">Esperando modelo...</div>
+<script>
+  let modelo;
+  const video = document.getElementById('video');
+  const resultado = document.getElementById('resultado');
 
-  <script>
-    let modelo;
-    const video = document.getElementById('video');
-    const resultado = document.getElementById('resultado');
-
-    // ✅ Iniciar cámara
-    async function iniciarCamara() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        video.srcObject = stream;
-      } catch (err) {
-        alert("Error al acceder a la cámara: " + err);
-      }
+  async function iniciarCamara() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      video.srcObject = stream;
+    } catch (err) {
+      alert("Error al acceder a la cámara: " + err);
     }
+  }
 
-    // ✅ Cargar modelo
-    async function cargarModelo() {
-      resultado.innerText = "Cargando modelo...";
-      modelo = await tf.loadLayersModel("ClasificadorFlores/carpeta_salida/model.json");
+  async function cargarModelo() {
+    resultado.innerText = "Cargando modelo...";
+    try {
+      modelo = await tf.loadLayersModel("carpeta_salida/model.json");
       resultado.innerText = "Modelo cargado ✅";
+    } catch (e) {
+      resultado.innerText = "❌ Error al cargar el modelo";
+      console.error(e);
+    }
+  }
+
+  async function predecir() {
+    if (!modelo) {
+      alert("Primero debes cargar el modelo.");
+      return;
     }
 
-    // ✅ Realizar predicción
-    async function predecir() {
-      const img = tf.browser.fromPixels(video)
-        .resizeNearestNeighbor([128, 128]) // ajusta según tamaño de entrada de tu red
-        .toFloat()
-        .div(255)
-        .expandDims();
+    const img = tf.browser.fromPixels(video)
+      .resizeNearestNeighbor([128, 128])
+      .toFloat()
+      .div(255)
+      .expandDims();
 
-      const pred = modelo.predict(img);
-      const clase = pred.argMax(-1).dataSync()[0];
+    const pred = modelo.predict(img);
+    const clase = pred.argMax(-1).dataSync()[0];
 
-      // Opcional: nombres de clases
-      const nombres = ["clavel", "rosa", "girasol", "diente de león", "margarita"];
-      const nombre = nombres[clase] || "desconocida";
+    const nombres = ["clavel", "rosa", "girasol", "diente de león", "margarita"];
+    resultado.innerText = `🌼 Predicción: ${nombres[clase] || "desconocida"} (clase ${clase})`;
+  }
 
-      resultado.innerText = `🌼 Predicción: ${nombre} (clase ${clase})`;
-    }
+  iniciarCamara();
+  cargarModelo();
+</script>
 
-    // Inicializar todo
-    iniciarCamara();
-    cargarModelo();
-  </script>
-</body>
-</html>
